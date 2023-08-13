@@ -43,7 +43,7 @@ public class ExcelFile {
         OutputStream os = response.getOutputStream();
         workbook.write(os);
         workbook.close();
-        os.close();
         workbook.dispose();
+        os.close();
     }
 }
