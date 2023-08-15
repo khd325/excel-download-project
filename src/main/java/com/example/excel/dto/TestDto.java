@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TestDto {
+public class TestDto extends ExcelDto {
 
 
     @ExcelHeader(headerName = "이름",  colIndex = 0, headerStyle = @HeaderStyle(background = @Background("#ECEFF3")))

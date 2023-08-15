@@ -1,6 +1,8 @@
 package com.example.excel;
 
+import com.example.excel.dto.ExcelDto;
 import com.example.excel.util.ExcelUtil;
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -8,7 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class ExcelFile {
@@ -21,14 +25,15 @@ public class ExcelFile {
         this.sheet = this.workbook.createSheet();
     }
 
-    public void downloadExcel(HttpServletResponse response, String fileName, HashMap<String, Object> dataMap) throws ClassNotFoundException, IOException {
+    public void downloadExcel(HttpServletResponse response, String fileName, LinkedHashMap<String, Object> dataMap, HashMap<String, Class> classInfoMap) throws ClassNotFoundException, IOException {
 
         for (String key : dataMap.keySet()) {
             Object data = dataMap.get(key);
 
-            if(data instanceof List) {
-                List<?> dataList = (List<?>) data;
-                Class<?> dtoClass = dataList.get(0).getClass();
+//            if(data instanceof List) {
+            if(data.getClass() == ArrayList.class) {
+                List<ExcelDto> dataList = (List<ExcelDto>) data;
+                Class<ExcelDto> dtoClass = classInfoMap.get(key);
 
                 try {
                     Method exportMethod = ExcelUtil.class.getMethod("export", SXSSFWorkbook.class, Class.class, List.class);

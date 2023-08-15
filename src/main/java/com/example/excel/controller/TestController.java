@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.Color;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,17 +25,23 @@ public class TestController {
     @GetMapping("/excel/download")
     public void downloadExcel(HttpServletResponse response) throws IOException, IllegalAccessException {
 
-        List<TestDto> testDtos = TestDto.makeDummyData();
-        testDtos.add(new TestDto(null,19));
-        List<TestDto.StatDto> statDtos = TestDto.StatDto.makeDummyData();
+//        List<TestDto> testDtos = TestDto.makeDummyData();
+//        testDtos.add(new TestDto(null,19));
+//        List<TestDto.StatDto> statDtos = TestDto.StatDto.makeDummyData();
+
+        List<TestDto> testDtos = new ArrayList<>();
+        List<TestDto.StatDto> statDtos = new ArrayList<>();
 
         LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();
-//        dataMap.put("stat", statDtos);
-        dataMap.put("dataList", testDtos);
+        HashMap<String, Class> classInfoMap = new HashMap<>();
 
+        dataMap.put("stat", statDtos);
+        classInfoMap.put("stat", TestDto.StatDto.class);
+        dataMap.put("dataList", testDtos);
+        classInfoMap.put("dataList", TestDto.class);
         ExcelFile excelFile = new ExcelFile();
         try {
-            excelFile.downloadExcel(response, "test", dataMap);
+            excelFile.downloadExcel(response, "test", dataMap, classInfoMap);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
