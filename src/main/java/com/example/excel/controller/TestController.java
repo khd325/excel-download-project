@@ -25,12 +25,10 @@ public class TestController {
     @GetMapping("/excel/download")
     public void downloadExcel(HttpServletResponse response) throws IOException, IllegalAccessException {
 
-//        List<TestDto> testDtos = TestDto.makeDummyData();
-//        testDtos.add(new TestDto(null,19));
-//        List<TestDto.StatDto> statDtos = TestDto.StatDto.makeDummyData();
+        List<TestDto> testDtos = TestDto.makeDummyData();
 
-        List<TestDto> testDtos = new ArrayList<>();
-        List<TestDto.StatDto> statDtos = new ArrayList<>();
+        List<TestDto.StatDto> statDtos = TestDto.StatDto.makeDummyData();
+
 
         LinkedHashMap<String, Object> dataMap = new LinkedHashMap<>();
         HashMap<String, Class> classInfoMap = new HashMap<>();

@@ -2,8 +2,9 @@ package com.example.excel.util;
 
 import com.example.excel.ExcelBody;
 import com.example.excel.ExcelHeader;
-import org.apache.commons.lang3.StringUtils;
+import com.example.excel.HeaderStyle;
 import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
@@ -14,7 +15,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFFont;
 
 import java.awt.*;
 import java.lang.reflect.Field;
@@ -35,24 +35,24 @@ public class ExcelUtil {
                 .collect(Collectors.groupingBy(ExcelHeader::rowIndex));
 
         int index = getLastRow(sheet);
+        System.out.println("lastRow = " + index);
 
 
         for (Integer key : headerMap.keySet()) {
             SXSSFRow row = sheet.createRow(index++);
             for (ExcelHeader excelHeader : headerMap.get(key)) {
                 SXSSFCell cell = row.createCell(excelHeader.colIndex());
-                XSSFCellStyle cellStyle = (XSSFCellStyle) workbook.createCellStyle();
+                XSSFCellStyle cellStyle = workbook.getXSSFWorkbook().createCellStyle();
                 cell.setCellValue(excelHeader.headerName());
 
                 cellStyle.setAlignment(excelHeader.headerStyle().horizontalAlignment());
                 cellStyle.setVerticalAlignment(excelHeader.headerStyle().verticalAlignment());
 
-                if (isHex(excelHeader.headerStyle().background().value())) {
-                    cellStyle.setFillForegroundColor(new XSSFColor(Color.decode(excelHeader.headerStyle().background().value()), new DefaultIndexedColorMap()));
-                    cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-                }
+                XSSFColor xssfColor = new XSSFColor(Color.decode(excelHeader.headerStyle().background().value()), new DefaultIndexedColorMap());
+                cellStyle.setFillForegroundColor(xssfColor);
+                cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
-                XSSFFont font = workbook.getXSSFWorkbook().createFont();
+                org.apache.poi.ss.usermodel.Font font = workbook.createFont();
                 font.setFontHeightInPoints((short) excelHeader.headerStyle().fontSize());
                 font.setBold(true);
                 cellStyle.setFont(font);
@@ -139,10 +139,10 @@ public class ExcelUtil {
 
         for (Field field : groupMap.keySet()) {
             int dataRowIndex = headerMap.keySet().size();
-            for(int i = 0; i < groupMap.get(field).size(); i++) {
+            for (int i = 0; i < groupMap.get(field).size(); i++) {
                 SXSSFRow row = sheet.createRow(index++);
                 SXSSFCell cell = row.getCell(field.getDeclaredAnnotation(ExcelBody.class).colIndex());
-                if(!(dataRowIndex == groupMap.get(field).get(i))) {
+                if (!(dataRowIndex == groupMap.get(field).get(i))) {
                     CellRangeAddress cellAddresses = new CellRangeAddress(dataRowIndex, groupMap.get(field).get(i), cell.getColumnIndex(), cell.getColumnIndex());
                     sheet.addMergedRegion(cellAddresses);
                 }
@@ -151,7 +151,7 @@ public class ExcelUtil {
         }
 
         List<CellRangeAddress> mergedRegions = sheet.getMergedRegions();
-        for(CellRangeAddress rangeAddress : mergedRegions) {
+        for (CellRangeAddress rangeAddress : mergedRegions) {
             RegionUtil.setBorderBottom(BorderStyle.THIN, rangeAddress, sheet);
             RegionUtil.setBorderLeft(BorderStyle.THIN, rangeAddress, sheet);
             RegionUtil.setBorderRight(BorderStyle.THIN, rangeAddress, sheet);
@@ -159,43 +159,6 @@ public class ExcelUtil {
         }
     }
 
-
-    private static boolean isHex(String hexCode) {
-        if (StringUtils.startsWith(hexCode, "#")) {
-            for (Character c : hexCode.substring(1).toCharArray()) {
-                switch (c) {
-                    case '0':
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                    case 'a':
-                    case 'b':
-                    case 'c':
-                    case 'd':
-                    case 'e':
-                    case 'f':
-                    case 'A':
-                    case 'B':
-                    case 'C':
-                    case 'D':
-                    case 'E':
-                    case 'F':
-                        break;
-                    default:
-                        return false;
-                }
-            }
-        } else {
-            return false;
-        }
-        return true;
-    }
 
     private int getLastRow(SXSSFSheet sheet) {
         int lastRowNum = sheet.getLastRowNum();
