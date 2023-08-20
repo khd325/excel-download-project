@@ -20,14 +20,14 @@ import java.util.List;
 public class ExcelStatSample implements ExcelStatInterface{
 
     @ExcelHeader(headerName = "NO", colIndex = 1)
-    @ExcelBody(rowIndex = 1, colIndex = 1)
+    @ExcelBody(colIndex = 1, rowIndex = 1)
     private Integer row;
 
     @ExcelHeader(headerName = "summary", colIndex = 0, rowIndex = 1)
     private String summary;
 
     @ExcelHeader(headerName = "total", colIndex = 2)
-    @ExcelBody(rowIndex = 1, colIndex = 2)
+    @ExcelBody(colIndex = 2, rowIndex = 1)
     private String total;
 
 

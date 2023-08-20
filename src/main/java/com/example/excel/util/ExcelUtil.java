@@ -71,14 +71,20 @@ public class ExcelUtil {
         XSSFCellStyle bodyCellStyle = ExcelUtil.createBodyCellStyle(workbook);
 
         for (Integer key : headerMap.keySet()) {
-            SXSSFRow row = sheet.createRow(index++);
+            SXSSFRow row;
             for (ExcelHeader excelHeader : headerMap.get(key)) {
+
+                row = sheet.getRow(index + key);
+
+                if (row == null) {
+                    row = sheet.createRow(index + excelHeader.rowIndex());
+                }
                 SXSSFCell cell = row.createCell(excelHeader.colIndex());
 
                 cell.setCellStyle(headerCellStyle);
                 cell.setCellValue(excelHeader.headerName());
 
-                if(excelHeader.headerName().length() > columnLength[excelHeader.colIndex()]) {
+                if (excelHeader.headerName().length() > columnLength[excelHeader.colIndex()]) {
                     columnLength[excelHeader.colIndex()] = excelHeader.headerName().length();
                 }
 
@@ -86,20 +92,31 @@ public class ExcelUtil {
                     CellRangeAddress cellAddresses = new CellRangeAddress(cell.getAddress().getRow(), cell.getAddress().getRow() + excelHeader.rowSpan(), cell.getAddress().getColumn(), cell.getAddress().getColumn() + excelHeader.colSpan());
                     sheet.addMergedRegion(cellAddresses);
                 }
+
             }
         }
 
+        System.out.println("after Header index = " + index);
 
-        for (ExcelInterface t : data) {
+
+        for (int i = 0; i < data.size(); i++) {
             for (Integer key : fieldMap.keySet()) {
-                SXSSFRow row = sheet.createRow(index++);
+                SXSSFRow row;
                 for (Field field : fieldMap.get(key)) {
+
+                    row = sheet.getRow(index + key + i);
+
+                    if (row == null) {
+                        row = sheet.createRow(index + key + i);
+                    }
+
                     ExcelBody excelBody = field.getDeclaredAnnotation(ExcelBody.class);
-                    Object o = field.get(t);
+
+                    Object o = field.get(data.get(i));
                     SXSSFCell cell = row.createCell(excelBody.colIndex());
 
 
-                    if(o == null) {
+                    if (o == null) {
                         cell.setCellValue("");
                     } else if (o.getClass() == Integer.class) {
                         cell.setCellValue(Integer.parseInt(String.valueOf(o)));
@@ -120,7 +137,9 @@ public class ExcelUtil {
                     }
                 }
             }
+
         }
+
 
         for (int i = 0; i < fields.length; i++) {
             sheet.setColumnWidth(i, columnLength[i] * 512);

@@ -23,15 +23,15 @@ public class ExcelDataDto implements ExcelDtoInterface {
 
 
     @ExcelHeader(headerName = "이름",  colIndex = 0)
-    @ExcelBody(rowIndex = 1, colIndex = 0)
+    @ExcelBody(colIndex = 0, rowIndex = 1)
     private String name;
 
     @ExcelHeader(headerName = "나이", colIndex = 1)
-    @ExcelBody(rowIndex = 1, colIndex = 1)
+    @ExcelBody(colIndex = 1, rowIndex = 1)
     private int age;
 
     @ExcelHeader(headerName = "번호", colIndex = 2)
-    @ExcelBody(rowIndex = 1, colIndex = 2)
+    @ExcelBody(colIndex = 2, rowIndex = 1)
     private String no;
 
     public static void makeDummyData(List<ExcelInterface> list) {
