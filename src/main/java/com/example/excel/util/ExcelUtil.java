@@ -2,14 +2,10 @@ package com.example.excel.util;
 
 import com.example.excel.ExcelBody;
 import com.example.excel.ExcelHeader;
-import com.example.excel.HeaderStyle;
-import com.example.excel.dto.ExcelDtoInterface;
 import com.example.excel.dto.ExcelInterface;
-import org.apache.poi.ss.formula.functions.T;
-import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
@@ -18,16 +14,17 @@ import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
 
-import java.awt.*;
 import java.awt.Color;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ExcelUtil {
 
-    int[] columnLength;
+    private static int[] columnLength;
 
 
     public void export(SXSSFWorkbook workbook, Class<ExcelInterface> excelClass, List<ExcelInterface> data) throws IllegalAccessException {
@@ -40,8 +37,12 @@ public class ExcelUtil {
                 .collect(Collectors.groupingBy(ExcelHeader::rowIndex));
 
         Field[] fields = Arrays.stream(excelClass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(ExcelHeader.class))
-                .sorted(Comparator.comparing(field -> field.getDeclaredAnnotation(ExcelHeader.class).colIndex()))
+                .filter(field -> field.isAnnotationPresent(ExcelBody.class))
+                .map(field -> {
+                    field.setAccessible(true);
+                    return field;
+                })
+                .sorted(Comparator.comparing(field -> field.getDeclaredAnnotation(ExcelBody.class).colIndex()))
                 .toArray(Field[]::new);
 
         Map<Integer, List<Field>> fieldMap = Arrays.stream(excelClass.getDeclaredFields())
@@ -54,12 +55,12 @@ public class ExcelUtil {
 
         int index = getLastRow(sheet);
 
-        if(columnLength == null) {
-            columnLength = new int[fields.length];
+        if (columnLength == null) {
+            columnLength = new int[excelClass.getDeclaredFields().length];
             Arrays.fill(columnLength, 1);
         } else {
-            if (columnLength.length < fields.length) {
-                int[] temp = new int[fields.length];
+            if (columnLength.length < excelClass.getDeclaredFields().length) {
+                int[] temp = new int[excelClass.getDeclaredFields().length];
                 Arrays.fill(temp, 1);
                 System.arraycopy(columnLength, 0, temp, 0, columnLength.length);
                 columnLength = temp;
@@ -77,12 +78,17 @@ public class ExcelUtil {
                 cell.setCellStyle(headerCellStyle);
                 cell.setCellValue(excelHeader.headerName());
 
+                if(excelHeader.headerName().length() > columnLength[excelHeader.colIndex()]) {
+                    columnLength[excelHeader.colIndex()] = excelHeader.headerName().length();
+                }
+
                 if (excelHeader.colSpan() > 0 || excelHeader.rowSpan() > 0) {
                     CellRangeAddress cellAddresses = new CellRangeAddress(cell.getAddress().getRow(), cell.getAddress().getRow() + excelHeader.rowSpan(), cell.getAddress().getColumn(), cell.getAddress().getColumn() + excelHeader.colSpan());
                     sheet.addMergedRegion(cellAddresses);
                 }
             }
         }
+
 
         for (ExcelInterface t : data) {
             for (Integer key : fieldMap.keySet()) {
@@ -114,6 +120,10 @@ public class ExcelUtil {
                     }
                 }
             }
+        }
+
+        for (int i = 0; i < fields.length; i++) {
+            sheet.setColumnWidth(i, columnLength[i] * 512);
         }
         /*List<Field> groupField = Arrays.stream(excelClass.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(ExcelBody.class) && field.getDeclaredAnnotation(ExcelBody.class).rowGroup())
@@ -173,7 +183,7 @@ public class ExcelUtil {
     public static XSSFCellStyle createHeaderCellStyle(SXSSFWorkbook workbook) {
         Font font = workbook.createFont();
         font.setBold(true);
-        font.setFontHeightInPoints((short)9);
+        font.setFontHeightInPoints((short) 9);
         font.setFontName("맑은 고딕");
 
 
@@ -198,7 +208,7 @@ public class ExcelUtil {
     public static XSSFCellStyle createBodyCellStyle(SXSSFWorkbook workbook) {
 
         Font font = workbook.createFont();
-        font.setFontHeightInPoints((short)9);
+        font.setFontHeightInPoints((short) 9);
         font.setFontName("맑은 고딕");
 
         XSSFCellStyle cellStyle = workbook.getXSSFWorkbook().createCellStyle();

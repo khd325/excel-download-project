@@ -9,6 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,12 +19,21 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExcelStatSample implements ExcelStatInterface{
 
-    @ExcelHeader(headerName = "NO", colIndex = 0)
-    @ExcelBody(rowIndex = 1, colIndex = 0)
+    @ExcelHeader(headerName = "NO", colIndex = 1)
+    @ExcelBody(rowIndex = 1, colIndex = 1)
     private Integer row;
 
-    @ExcelHeader(headerName = "total", colIndex = 1)
-    @ExcelBody(rowIndex = 1, colIndex = 1)
+    @ExcelHeader(headerName = "summary", colIndex = 0, rowIndex = 1)
+    private String summary;
+
+    @ExcelHeader(headerName = "total", colIndex = 2)
+    @ExcelBody(rowIndex = 1, colIndex = 2)
     private String total;
+
+
+    public static void makeDummy(List<ExcelInterface> list) {
+
+        list.add(new ExcelStatSample(1,null, "12341567"));
+    }
 
 }

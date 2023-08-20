@@ -2,6 +2,7 @@ package com.example.excel;
 
 import com.example.excel.dto.ExcelInterface;
 import com.example.excel.util.ExcelUtil;
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
@@ -24,10 +25,10 @@ public class ExcelFile {
         this.sheet = this.workbook.createSheet();
     }
 
-    public void downloadExcel(HttpServletResponse response, String fileName, LinkedHashMap<String, ExcelInterface> dataMap, HashMap<String, Class> classInfoMap) throws ClassNotFoundException, IOException, IllegalAccessException {
+    public void downloadExcel(HttpServletResponse response, String fileName, LinkedHashMap<String, List<ExcelInterface>> dataMap, HashMap<String, Class> classInfoMap) throws ClassNotFoundException, IOException, IllegalAccessException {
 
         for (String key : dataMap.keySet()) {
-            ExcelInterface data = dataMap.get(key);
+            Object data = dataMap.get(key);
             ExcelUtil excelUtil = new ExcelUtil();
 //            if(data instanceof List) {
             if(data.getClass() == ArrayList.class) {
@@ -35,13 +36,6 @@ public class ExcelFile {
                 Class<ExcelInterface> dtoClass = classInfoMap.get(key);
 
                 excelUtil.export(workbook, dtoClass, dataList);
-
-//                try {
-//                    Method exportMethod = ExcelUtil.class.getMethod("export", SXSSFWorkbook.class, Class.class, List.class);
-//                    exportMethod.invoke(new ExcelUtil(), workbook, dtoClass, dataList);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
             }
         }
 

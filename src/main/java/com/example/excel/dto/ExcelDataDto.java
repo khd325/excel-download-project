@@ -34,14 +34,14 @@ public class ExcelDataDto implements ExcelDtoInterface {
     @ExcelBody(rowIndex = 1, colIndex = 2)
     private String no;
 
-    public static List<ExcelDataDto> makeDummyData() {
+    public static void makeDummyData(List<ExcelInterface> list) {
 
 
-        return IntStream.rangeClosed(0, 10)
+        IntStream.rangeClosed(0, 10)
                 .mapToObj(j -> {
                     ExcelDataDto testDto = new ExcelDataDto("name " + j, j, StringUtils.repeat(String.valueOf(j), 8));
                     return testDto;
-                }).collect(Collectors.toList());
+                }).forEach(data -> list.add(data));
 
     }
 }
